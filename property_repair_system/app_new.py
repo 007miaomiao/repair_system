@@ -79,7 +79,7 @@ def service_page():
 
         repair = Repair.query.get(repair_id)
         repair.status = 'assigned'
-
+        
         db.session.commit()
 
         #return "派工成功"
@@ -89,6 +89,11 @@ def service_page():
 
     timeout_repairs = []
 
+    completed_count = Repair.query.filter(
+        Repair.status.in_(['completed', 'paid'])
+    ).count()
+
+
     for repair in pending_repairs:
         if datetime.now() - repair.created_at > timedelta(hours=24):
             timeout_repairs.append(repair.id)
@@ -97,13 +102,38 @@ def service_page():
         key=lambda r: (r.id not in timeout_repairs, r.created_at)
     )
 
+    pending_count = len(pending_repairs)
+    timeout_count = len(timeout_repairs)
+
+    completed_count = Repair.query.filter(
+    Repair.status.in_(['completed', 'paid'])
+    ).count()
+
     workers = User.query.filter_by(role='worker').all()
+
+    repair_type_stats = db.session.query(
+        Repair.repair_type,
+        db.func.count(Repair.id)
+    ).group_by(Repair.repair_type).all()
+
+    total_evaluations = Evaluation.query.count()
+    satisfied_count = Evaluation.query.filter(Evaluation.rating >= 4).count()
+
+    if total_evaluations > 0:
+        satisfaction_rate = round(satisfied_count / total_evaluations * 100, 2)
+    else:
+        satisfaction_rate = 0
 
     return render_template(
         'service_dashboard.html',
         repairs=pending_repairs,
         workers=workers,
-        timeout_repairs=timeout_repairs
+        timeout_repairs=timeout_repairs,
+        pending_count=pending_count,
+        timeout_count=timeout_count,
+        completed_count=completed_count,
+        repair_type_stats=repair_type_stats,
+        satisfaction_rate=satisfaction_rate
     )
 
 
@@ -195,6 +225,7 @@ def submit_evaluation(repair_id):
 
     db.session.add(evaluation)
     db.session.commit()
+
 
     return redirect('/owner')
 
