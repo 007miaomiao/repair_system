@@ -48,12 +48,12 @@ def owner_dashboard():
     repairs = Repair.query.filter_by(owner_id=session['userid'])\
                 .order_by(Repair.created_at.desc()).all()
 
-    evaluations = Evaluation.query.all()
+    evaluated_repairs = [e.repair_id for e in Evaluation.query.all()]
 
     return render_template(
         'owner_dashboard.html',
         repairs=repairs,
-        evaluations=evaluations
+        evaluated_repairs=evaluated_repairs
     )
 
 @app.route('/service', methods=['GET', 'POST'])
@@ -185,12 +185,14 @@ def submit_repair():
 
     repair_type = request.form['repair_type']
     description = request.form['description']
+    user = User.query.get(session['userid'])
 
     new_repair = Repair(
         owner_id=session['userid'],
         repair_type=repair_type,
         description=description,
-        status='pending'
+        status='pending',
+        owner_address=user.address
     )
 
     db.session.add(new_repair)

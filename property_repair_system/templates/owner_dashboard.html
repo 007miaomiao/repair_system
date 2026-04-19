@@ -1,59 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>业主页面</title>
+    <title>业主报修中心</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h2>业主报修</h2>
+<body style="background-color:#f5f7fa;">
 
-    <form method="POST" action="/submit_repair">
-        <p>报修类型：<input type="text" name="repair_type" required></p>
-        <p>问题描述：<textarea name="description" required></textarea></p>
-        <button type="submit">提交报修</button>
-    </form>
+<div class="container mt-5">
 
-    <hr>
+    <!-- 顶部标题 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">业主报修中心</h2>
+        <a href="/logout" class="btn btn-outline-danger">退出登录</a>
+    </div>
 
-    <h3>我的报修记录</h3>
+    <!-- 报修表单 -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            提交报修申请
+        </div>
+        <div class="card-body">
+            <form method="POST" action="/submit_repair">
+                <div class="mb-3">
+                    <label class="form-label">报修类型</label>
+                    <input type="text" name="repair_type" class="form-control" required>
+                </div>
 
-<table border="1" cellpadding="8">
-    <tr>
-        <th>报修类型</th>
-        <th>问题描述</th>
-        <th>状态</th>
-        <th>提交时间</th>
-        <th>评价</th>
-    </tr>
+                <div class="mb-3">
+                    <label class="form-label">问题描述</label>
+                    <textarea name="description" class="form-control" rows="3" required></textarea>
+                </div>
 
-    {% for repair in repairs %}
-    <tr>
-        <td>{{ repair.repair_type }}</td>
-        <td>{{ repair.description }}</td>
-        <td>{{ repair.status }}</td>
-        <td>{{ repair.created_at }}</td>
-        <td>
-            {% if repair.status == 'paid' %}
-                {% set evaluated = false %}
-                {% for e in evaluations %}
-                    {% if e.repair_id == repair.id %}
-                        {% set evaluated = true %}
-                    {% endif %}
+                <button type="submit" class="btn btn-primary">提交报修</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 报修记录 -->
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            我的报修记录
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>报修类型</th>
+                        <th>问题描述</th>
+                        <th>状态</th>
+                        <th>提交时间</th>
+                        <th>评价</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for repair in repairs %}
+                    <tr>
+                        <td>{{ repair.repair_type }}</td>
+                        <td>{{ repair.description }}</td>
+                        <td>
+                            {% if repair.status == 'pending' %}
+                                <span class="badge bg-warning">待处理</span>
+                            {% elif repair.status == 'assigned' %}
+                                <span class="badge bg-info">已派工</span>
+                            {% elif repair.status == 'completed' %}
+                                <span class="badge bg-primary">已维修</span>
+                            {% elif repair.status == 'paid' %}
+                                <span class="badge bg-success">已支付</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ repair.created_at }}</td>
+                        <td>
+                            {% if repair.status == 'paid' %}
+                                {% if repair.id in evaluated_repairs %}
+                                    <span class="text-success">已评价</span>
+                                {% else %}
+                                    <form method="POST" action="/submit_evaluation/{{ repair.id }}">
+                                        <input type="number" name="rating" min="1" max="5" class="form-control mb-2" placeholder="评分" required>
+                                        <textarea name="comment" class="form-control mb-2" rows="2" placeholder="评价内容"></textarea>
+                                        <button type="submit" class="btn btn-sm btn-success">提交评价</button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">未完成</span>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                {% if evaluated %}
-                    已评价
-                {% else %}
-                    <form method="POST" action="/submit_evaluation/{{ repair.id }}">
-                        <input type="number" name="rating" min="1" max="5" placeholder="评分" required><br>
-                        <textarea name="comment" placeholder="评价内容"></textarea><br>
-                        <button type="submit">提交评价</button>
-                    </form>
-                {% endif %}
-            {% else %}
-                未完成
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+</div>
+
+</body>
+</html>
