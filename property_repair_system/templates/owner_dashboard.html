@@ -1,19 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>业主报修</title>
+    <meta charset="UTF-8">
+    <title>业主页面</title>
 </head>
 <body>
-    <h2>提交报修申请</h2>
+    <h2>业主报修</h2>
 
-    <form method="post">
-        报修类型：
-        <input type="text" name="repair_type"><br><br>
-
-        问题描述：
-        <textarea name="description"></textarea><br><br>
-
+    <form method="POST" action="/submit_repair">
+        <p>报修类型：<input type="text" name="repair_type" required></p>
+        <p>问题描述：<textarea name="description" required></textarea></p>
         <button type="submit">提交报修</button>
     </form>
-</body>
-</html>
+
+    <hr>
+
+    <h3>我的报修记录</h3>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>报修类型</th>
+        <th>问题描述</th>
+        <th>状态</th>
+        <th>提交时间</th>
+        <th>评价</th>
+    </tr>
+
+    {% for repair in repairs %}
+    <tr>
+        <td>{{ repair.repair_type }}</td>
+        <td>{{ repair.description }}</td>
+        <td>{{ repair.status }}</td>
+        <td>{{ repair.created_at }}</td>
+        <td>
+            {% if repair.status == 'paid' %}
+                {% set evaluated = false %}
+                {% for e in evaluations %}
+                    {% if e.repair_id == repair.id %}
+                        {% set evaluated = true %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if evaluated %}
+                    已评价
+                {% else %}
+                    <form method="POST" action="/submit_evaluation/{{ repair.id }}">
+                        <input type="number" name="rating" min="1" max="5" placeholder="评分" required><br>
+                        <textarea name="comment" placeholder="评价内容"></textarea><br>
+                        <button type="submit">提交评价</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                未完成
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>

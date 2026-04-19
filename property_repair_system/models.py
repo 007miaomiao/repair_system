@@ -47,3 +47,11 @@ class Payment(db.Model):
     amount = db.Column(db.Numeric(10, 2))
     status = db.Column(db.String(20), default='unpaid')
     paid_at = db.Column(db.DateTime)
+
+class Evaluation(db.Model):
+    __tablename__ = 'evaluations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    repair_id = db.Column(db.Integer, db.ForeignKey('repairs.id'), nullable=False)
+    rating = db.Column(db.Integer)
+    comment = db.Column(db.Text)
