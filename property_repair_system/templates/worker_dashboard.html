@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>维修工任务</title>
+</head>
+<body>
+    <h2>我的维修任务</h2>
+
+    <table border="1">
+        <tr>
+            <th>报修ID</th>
+            <th>报修类型</th>
+            <th>描述</th>
+            <th>提交维修结果</th>
+        </tr>
+
+        {% for repair in repairs %}
+        <tr>
+            <td>{{ repair.id }}</td>
+            <td>{{ repair.repair_type }}</td>
+            <td>{{ repair.description }}</td>
+            <td>
+                <form method="post">
+                    <input type="hidden" name="repair_id" value="{{ repair.id }}">
+
+                    维修结果：
+                    <input type="text" name="result"><br>
+
+                    费用：
+                    <input type="number" step="0.01" name="cost"><br>
+
+                    <button type="submit">提交</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

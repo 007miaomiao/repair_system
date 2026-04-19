@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客服派工</title>
+</head>
+<body>
+    <h2>待处理报修单</h2>
+
+    <table border="1">
+        <tr>
+            <th>报修ID</th>
+            <th>报修类型</th>
+            <th>描述</th>
+            <th>提交时间</th>
+            <th>派工</th>
+        </tr>
+
+        {% for repair in repairs %}
+        <tr>
+            <td>{{ repair.id }}</td>
+            <td>{{ repair.repair_type }}</td>
+            <td>{{ repair.description }}</td>
+            <td>{{ repair.created_at }}</td>
+            <td>
+                <form method="post">
+                    <input type="hidden" name="repair_id" value="{{ repair.id }}">
+
+                    <select name="worker_id">
+                        {% for worker in workers %}
+                        <option value="{{ worker.userid }}">
+                            {{ worker.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit">派工</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
