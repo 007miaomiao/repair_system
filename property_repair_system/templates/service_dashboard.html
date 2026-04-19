@@ -33,6 +33,7 @@
                         <th>报修类型</th>
                         <th>问题描述</th>
                         <th>分配维修工</th>
+                        <th>状态</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -55,6 +56,13 @@
                                         <option value="{{ worker.userid }}">{{ worker.username }}</option>
                                     {% endfor %}
                                 </select>
+                            </td>
+                            <td>
+                                {% if repair.id in timeout_repairs %}
+                                    <span class="badge bg-danger">超时未处理</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">待处理</span>
+                                {% endif %}
                             </td>
                             <td>
                                 <button type="submit" class="btn btn-success btn-sm">派工</button>

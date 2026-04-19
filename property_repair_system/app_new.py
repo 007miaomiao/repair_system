@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash
 from config import Config
 from models import User, Repair, Assignment, MaintenanceRecord, Payment, Evaluation, db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.secret_key = '123456'
 
 db.init_app(app)
 
@@ -50,10 +51,17 @@ def owner_dashboard():
 
     evaluated_repairs = [e.repair_id for e in Evaluation.query.all()]
 
+    timeout_repairs = []
+    for repair in repairs:
+        if repair.status == 'pending':
+            if datetime.now() - repair.created_at > timedelta(hours=24):
+                timeout_repairs.append(repair.id)
+
     return render_template(
         'owner_dashboard.html',
         repairs=repairs,
-        evaluated_repairs=evaluated_repairs
+        evaluated_repairs=evaluated_repairs,
+        timeout_repairs=timeout_repairs
     )
 
 @app.route('/service', methods=['GET', 'POST'])
@@ -78,12 +86,24 @@ def service_page():
         return redirect('/service')
 
     pending_repairs = Repair.query.filter_by(status='pending').all()
+
+    timeout_repairs = []
+
+    for repair in pending_repairs:
+        if datetime.now() - repair.created_at > timedelta(hours=24):
+            timeout_repairs.append(repair.id)
+
+    pending_repairs.sort(
+        key=lambda r: (r.id not in timeout_repairs, r.created_at)
+    )
+
     workers = User.query.filter_by(role='worker').all()
 
     return render_template(
         'service_dashboard.html',
         repairs=pending_repairs,
-        workers=workers
+        workers=workers,
+        timeout_repairs=timeout_repairs
     )
 
 
@@ -187,6 +207,17 @@ def submit_repair():
     description = request.form['description']
     user = User.query.get(session['userid'])
 
+    existing = Repair.query.filter(
+        Repair.owner_id == session['userid'],
+        Repair.repair_type == repair_type,
+        Repair.description == description,
+        Repair.status != 'paid'
+    ).first()
+
+    if existing:
+        flash("该报修申请已存在，请勿重复提交", "warning")
+        return redirect('/owner')
+
     new_repair = Repair(
         owner_id=session['userid'],
         repair_type=repair_type,
@@ -199,6 +230,7 @@ def submit_repair():
     db.session.commit()
 
     return redirect('/owner')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
