@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, flash
+import os
+from flask import Flask, render_template, request, redirect, session, flash, send_from_directory
 from config import Config
 from models import User, Repair, Assignment, MaintenanceRecord, Payment, Evaluation, db
 from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -275,7 +277,25 @@ def submit_repair():
     db.session.add(new_repair)
     db.session.commit()
 
+    file = request.files.get('image')
+    if file and file.filename:
+        upload_dir = os.path.join(app.root_path, 'static', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
+        filename = f'{new_repair.id}.{ext}'
+        file.save(os.path.join(upload_dir, filename))
+
     return redirect('/owner')
+
+
+@app.route('/repair_photo/<int:repair_id>')
+def repair_photo(repair_id):
+    upload_dir = os.path.join(app.root_path, 'static', 'uploads')
+    for ext in ('jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'):
+        path = os.path.join(upload_dir, f'{repair_id}.{ext}')
+        if os.path.exists(path):
+            return send_from_directory(upload_dir, f'{repair_id}.{ext}')
+    return '', 404
 
 
 if __name__ == '__main__':

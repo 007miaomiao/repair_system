@@ -71,9 +71,10 @@
                     提交报修申请
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="/submit_repair">
+                    <form method="POST" action="/submit_repair" enctype="multipart/form-data">
                         <input type="text" name="repair_type" class="form-control mb-3" placeholder="报修类型" required>
                         <textarea name="description" class="form-control mb-3" rows="3" placeholder="问题描述" required></textarea>
+                        <input type="file" name="image" class="form-control mb-3" accept="image/*">
                         <button type="submit" class="btn btn-primary">提交报修</button>
                     </form>
                 </div>
@@ -90,6 +91,7 @@
                             <tr>
                                 <th>报修类型</th>
                                 <th>问题描述</th>
+                                <th>图片</th>
                                 <th>状态</th>
                                 <th>提交时间</th>
                                 <th>评价</th>
@@ -100,6 +102,13 @@
                             <tr>
                                 <td>{{ repair.repair_type }}</td>
                                 <td>{{ repair.description }}</td>
+                                <td>
+                                    <img src="/repair_photo/{{ repair.id }}"
+                                         onerror="this.style.display='none'"
+                                         class="img-thumbnail"
+                                         style="max-width:100px;max-height:100px;cursor:pointer"
+                                         onclick="window.open(this.src)">
+                                </td>
                                 <td>{{ repair.status }}</td>
                                 <td>{{ repair.created_at }}</td>
                                 <td>

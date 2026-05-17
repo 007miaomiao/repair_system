@@ -46,6 +46,7 @@
                                 <th>报修ID</th>
                                 <th>报修类型</th>
                                 <th>问题描述</th>
+                                <th>图片</th>
                                 <th>报修地址</th>
                                 <th>维修记录</th>
                             </tr>
@@ -56,6 +57,13 @@
                                 <td>{{ repair.id }}</td>
                                 <td>{{ repair.repair_type }}</td>
                                 <td>{{ repair.description }}</td>
+                                <td>
+                                    <img src="/repair_photo/{{ repair.id }}"
+                                         onerror="this.style.display='none'"
+                                         class="img-thumbnail"
+                                         style="max-width:100px;max-height:100px;cursor:pointer"
+                                         onclick="window.open(this.src)">
+                                </td>
                                 <td>{{ repair.owner_address }}</td>
 
                                 <td>
@@ -78,7 +86,7 @@
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">暂无待维修任务</td>
+                                <td colspan="6" class="text-center text-muted">暂无待维修任务</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -94,6 +102,7 @@
                                 <th>报修ID</th>
                                 <th>报修类型</th>
                                 <th>问题描述</th>
+                                <th>图片</th>
                                 <th>报修地址</th>
                                 <th>维修时间</th>
                             </tr>
@@ -104,12 +113,19 @@
                                 <td>{{ item.repair.id }}</td>
                                 <td>{{ item.repair.repair_type }}</td>
                                 <td>{{ item.repair.description }}</td>
+                                <td>
+                                    <img src="/repair_photo/{{ item.repair.id }}"
+                                         onerror="this.style.display='none'"
+                                         class="img-thumbnail"
+                                         style="max-width:100px;max-height:100px;cursor:pointer"
+                                         onclick="window.open(this.src)">
+                                </td>
                                 <td>{{ item.repair.owner_address }}</td>
                                 <td>{{ item.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted">暂无已完成维修记录</td>
+                                <td colspan="6" class="text-center text-muted">暂无已完成维修记录</td>
                             </tr>
                         {% endfor %}
                         </tbody>
