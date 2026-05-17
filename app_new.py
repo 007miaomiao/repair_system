@@ -51,6 +51,10 @@ def owner_dashboard():
 
     evaluated_repairs = [e.repair_id for e in Evaluation.query.all()]
 
+    pending_count = sum(1 for r in repairs if r.status == 'pending')
+    processing_count = sum(1 for r in repairs if r.status == 'assigned')
+    finished_count = sum(1 for r in repairs if r.status in ('completed', 'paid'))
+
     timeout_repairs = []
     for repair in repairs:
         if repair.status == 'pending':
@@ -61,7 +65,10 @@ def owner_dashboard():
         'owner_dashboard.html',
         repairs=repairs,
         evaluated_repairs=evaluated_repairs,
-        timeout_repairs=timeout_repairs
+        timeout_repairs=timeout_repairs,
+        pending_count=pending_count,
+        processing_count=processing_count,
+        finished_count=finished_count
     )
 
 @app.route('/service', methods=['GET', 'POST'])
@@ -170,12 +177,20 @@ def worker_page():
     assignments = Assignment.query.filter_by(worker_id=session['userid']).all()
 
     repairs = []
+    completed_records = []
     for a in assignments:
         repair = Repair.query.get(a.repair_id)
         if repair.status == 'assigned':
             repairs.append(repair)
+        elif repair.status in ('completed', 'paid'):
+            record = MaintenanceRecord.query.filter_by(repair_id=a.repair_id, worker_id=session['userid']).first()
+            if record:
+                completed_records.append({
+                    'repair': repair,
+                    'completed_at': record.completed_at
+                })
 
-    return render_template('worker_dashboard.html', repairs=repairs)
+    return render_template('worker_dashboard.html', repairs=repairs, completed_records=completed_records)
 
 
 @app.route('/finance', methods=['GET', 'POST'])

@@ -128,12 +128,17 @@ def worker_page():
     assignments = Assignment.query.filter_by(worker_id=session['userid']).all()
 
     repairs = []
+    completed_records = []
     for a in assignments:
         repair = Repair.query.get(a.repair_id)
         if repair.status == 'assigned':
             repairs.append(repair)
+        elif repair.status in ('completed', 'paid'):
+            record = MaintenanceRecord.query.filter_by(repair_id=a.repair_id, worker_id=session['userid']).first()
+            if record:
+                completed_records.append(record)
 
-    return render_template('worker_dashboard.html', repairs=repairs)
+    return render_template('worker_dashboard.html', repairs=repairs, completed_records=completed_records)
 
 
 @app.route('/finance', methods=['GET', 'POST'])

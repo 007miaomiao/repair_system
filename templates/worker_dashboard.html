@@ -23,12 +23,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item mb-3">
-                    <a href="#" class="nav-link text-secondary">
-                        已完成维修
-                    </a>
-                </li>
-
                 <li class="nav-item mt-5">
                     <a href="/logout" class="btn btn-outline-light w-100">
                         退出登录
@@ -40,7 +34,7 @@
         <!-- 右侧内容区 -->
         <div class="col-10 p-4">
 
-            <div class="card shadow">
+            <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">
                     我的维修任务
                 </div>
@@ -81,6 +75,41 @@
                                         </button>
                                     </form>
                                 </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">暂无待维修任务</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <hr>
+
+                    <h5 class="text-secondary mb-3">已完成维修</h5>
+
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>报修ID</th>
+                                <th>报修类型</th>
+                                <th>问题描述</th>
+                                <th>报修地址</th>
+                                <th>维修时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in completed_records %}
+                            <tr>
+                                <td>{{ item.repair.id }}</td>
+                                <td>{{ item.repair.repair_type }}</td>
+                                <td>{{ item.repair.description }}</td>
+                                <td>{{ item.repair.owner_address }}</td>
+                                <td>{{ item.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">暂无已完成维修记录</td>
                             </tr>
                         {% endfor %}
                         </tbody>

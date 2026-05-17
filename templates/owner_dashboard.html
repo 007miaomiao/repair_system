@@ -103,7 +103,7 @@
                                 <td>{{ repair.status }}</td>
                                 <td>{{ repair.created_at }}</td>
                                 <td>
-                                    {% if repair.status == 'paid' %}
+                                    {% if repair.status in ('completed', 'paid') %}
                                         {% if repair.id in evaluated_repairs %}
                                             <span class="text-success">已评价</span>
                                         {% else %}
